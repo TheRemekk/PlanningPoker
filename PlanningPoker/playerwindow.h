@@ -24,6 +24,8 @@ private slots:
     void socketDisconnected();
     void on_leaveGameBtn_clicked();
 
+    void on_sendMessageBtn_clicked();
+
 public slots:
     void onCardClicked(int cardNumber);
 

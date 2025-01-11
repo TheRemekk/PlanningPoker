@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QString>
 #include <QStringList>
+#include <QTextEdit>
 
 PlayerWindow::PlayerWindow(QWidget *parent, const QString &code, const QStringList &playerNameList)
     : QDialog(parent)
@@ -31,6 +32,14 @@ PlayerWindow::PlayerWindow(QWidget *parent, const QString &code, const QStringLi
         "background-color: #ad6b66"
     "}");
 
+    ui->chatWidget->setStyleSheet(
+        "QWidget#chatWidget {"
+        "background-color: #874641;"
+        "border: none;"
+        "border-left: 3px solid black;"
+        "}"
+    );
+
     socketManager = SocketManager::getInstance();
     cardManager = CardManager::getInstance();
     connect(socketManager, &SocketManager::socketDisconnected, this, &PlayerWindow::socketDisconnected);
@@ -46,6 +55,8 @@ PlayerWindow::PlayerWindow(QWidget *parent, const QString &code, const QStringLi
 
     cardManager->generateChooseCards(this);
     cardManager->toggleChooseCards(false);
+
+    ui->chatWidget->setVisible(false);
 }
 
 PlayerWindow::~PlayerWindow()
@@ -71,8 +82,10 @@ void PlayerWindow::responseReceived(const QString &message)
     QString wonGameMessage = "won";
     QString overtimeGameMessage = "overtime";
     QString topicMessage = "temat";
+    QString textPlayerMessage = "message";
 
     QString sequence = message;
+    sequence = sequence.replace("\n", " ");
 
     if(sequence.contains(joinPlayerMessage)) {
         int index = sequence.indexOf(joinPlayerMessage);
@@ -90,44 +103,56 @@ void PlayerWindow::responseReceived(const QString &message)
         cardManager->flipAllCards(false);
     }
     if(sequence.contains(stopMessage)) {
-        cardManager->toggleChooseCards(false);
-        ui->topicTextEdit->clear();
-
-        int startIndex = sequence.indexOf(selectedCardMessage) + selectedCardMessage.length();
-
-        QString neededData = sequence.mid(startIndex).trimmed();
-
-        int endIndex = neededData.indexOf("\n");
-        if (endIndex != -1) {
-            neededData = neededData.left(endIndex).trimmed();
-        }
-
-        QStringList parts = neededData.split(" ");
-        if (parts.size() % 2 != 0) {
-            qDebug() << "Nieprawidłowy format sekwencji!";
-            return;
-        }
-
-        for (int i = 0; i < parts.size(); i += 2) {
-            QString playerName = parts[i];
-            int cardNumber = parts[i + 1].toInt();
-
-            cardManager->setNumberCard(playerName, cardNumber);
-            cardManager->showCard(playerName);
-        }
+        ui->chatWidget->setVisible(false);
+        ui->messageTextEdit->clear();
     }
     if(sequence.contains(leavePlayerMessage)) {
         int index = sequence.indexOf(leavePlayerMessage);
         QString playerName = sequence.mid(index + leavePlayerMessage.length()).trimmed();
         cardManager->removeCard(playerName);
     }
+    if(sequence.contains(selectedCardMessage)) {
+        QString trimmedMessage = sequence.trimmed();
+        QStringList parts = trimmedMessage.split(" ", Qt::SkipEmptyParts);
+        QStringList cleanParts;
+
+        for (const QString &part : parts) {
+            if (part != "stop" && part != "selected" && part != "card" && part != "won") {
+                cleanParts.append(part);
+            }
+        }
+
+        for (int i = 0; i < cleanParts.size(); i += 2) {
+            if (i + 1 < cleanParts.size()) {
+                QString playerName = cleanParts[i];
+                int cardNumber = cleanParts[i + 1].toInt();
+                cardManager->setNumberCard(playerName, cardNumber);
+                cardManager->showCard(playerName);
+            }
+        }
+    }
     if(sequence.contains(wonGameMessage)) {
         int index = sequence.indexOf(wonGameMessage);
         QString numberCard = sequence.mid(index + wonGameMessage.length()).trimmed();
         ui->resultLabel->setText("Wygrana: "+numberCard);
+        ui->topicTextEdit->clear();
+        cardManager->toggleChooseCards(false);
+    }
+    if(sequence.contains(textPlayerMessage)) {
+        int index = sequence.indexOf(textPlayerMessage);
+        QString textMessage = sequence.mid(index + textPlayerMessage.length()).trimmed();
+        QStringList parts = textMessage.split(" ");
+        parts.removeAll("");
+
+        if (parts.size() > 1) {
+            QString playerName = parts.first();
+            QString text = parts.mid(1).join(" ");
+            ui->messageTextEdit->append(playerName + ": " + text);
+        }
     }
     if(sequence.contains(overtimeGameMessage)) {
         ui->resultLabel->setText("Dogrywka");
+        ui->chatWidget->setVisible(true);
     }
 }
 
@@ -141,3 +166,16 @@ void PlayerWindow::onCardClicked(int cardNumber)
     QString command = "selected card "+ QString::number(cardNumber);
     socketManager->writeCommand(command);
 }
+
+void PlayerWindow::on_sendMessageBtn_clicked()
+{
+    QString playerMessage = ui->sendMessageLineEdit->text().replace("\n", " ").trimmed();
+    QString command = "message "+playerMessage;
+    socketManager->writeCommand(command);
+
+    ui->messageTextEdit->setTextColor(Qt::blue);
+    ui->messageTextEdit->append("Ty: "+playerMessage+"\n");
+    ui->messageTextEdit->setTextColor(Qt::black);
+    ui->sendMessageLineEdit->clear();
+}
+

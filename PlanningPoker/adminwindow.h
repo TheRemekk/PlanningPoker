@@ -26,12 +26,13 @@ private slots:
     void on_startTalkBtn_clicked();
     void on_stopTalkBtn_clicked();
 
+    void on_sendMessageBtn_clicked();
+
 private:
     Ui::AdminWindow *ui;
     SocketManager *socketManager;
     CardManager *cardManager;
     QString code;
-    QString topic;
 };
 
 #endif // ADMINWINDOW_H

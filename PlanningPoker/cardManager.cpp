@@ -175,7 +175,7 @@ void CardManager::updateCardPositions()
 void CardManager::generateChooseCards(QWidget* parent) {
 
     int startX = 0;
-    int endX = 1200;
+    int endX = 1600;
     int minY = 700;
     int maxY = 900;
 
@@ -183,7 +183,7 @@ void CardManager::generateChooseCards(QWidget* parent) {
     int centerY = minY + (maxY - minY - chooseCardVerticalSize) / 2;
 
 
-    std::vector<int> cardNumbers = {0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89};
+    std::vector<int> cardNumbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
     int numCards = static_cast<int>(cardNumbers.size());
 
 

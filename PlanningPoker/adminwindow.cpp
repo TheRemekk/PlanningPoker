@@ -6,6 +6,7 @@
 #include <QPixmap>
 #include <QMessageBox>
 #include <QApplication>
+#include <QTextEdit>
 
 AdminWindow::AdminWindow(QWidget *parent, const QString &code)
     : QDialog(parent)
@@ -31,10 +32,20 @@ AdminWindow::AdminWindow(QWidget *parent, const QString &code)
         "background-color: #ad6b66"
     "}");
 
+    ui->chatWidget->setStyleSheet(
+        "QWidget#chatWidget {"
+        "background-color: #874641;"
+        "border: none;"
+        "border-left: 3px solid black;"
+        "}"
+    );
+
     socketManager = SocketManager::getInstance();
     cardManager = CardManager::getInstance();
     connect(socketManager, &SocketManager::socketDisconnected, this, &AdminWindow::socketDisconnected);
     connect(socketManager, &SocketManager::responseReceived, this, &AdminWindow::responseReceived);
+
+    ui->chatWidget->setVisible(false);
 }
 
 AdminWindow::~AdminWindow()
@@ -57,8 +68,10 @@ void AdminWindow::responseReceived(const QString &message)
     QString playerSelectedCardMessage = "selected card";
     QString wonGameMessage = "won";
     QString overtimeGameMessage = "overtime";
+    QString textPlayerMessage = "message";
 
     QString sequence = message;
+    sequence = sequence.replace("\n", " ");
 
     if(sequence.contains(joinPlayerMessage)) {
         int index = sequence.indexOf(joinPlayerMessage);
@@ -86,9 +99,26 @@ void AdminWindow::responseReceived(const QString &message)
         int index = sequence.indexOf(wonGameMessage);
         QString numberCard = sequence.mid(index + wonGameMessage.length()).trimmed();
         ui->resultLabel->setText("Wygrana: "+numberCard);
+        ui->topicTextEdit->clear();
+        ui->startTalkBtn->setEnabled(false);
+        ui->setTopicBtn->setEnabled(true);
+        ui->stopTalkBtn->setEnabled(false);
+    }
+    if(sequence.contains(textPlayerMessage)) {
+        int index = sequence.indexOf(textPlayerMessage);
+        QString textMessage = sequence.mid(index + textPlayerMessage.length()).trimmed();
+        QStringList parts = textMessage.split(" ");
+        parts.removeAll("");
+
+        if (parts.size() > 1) {
+            QString playerName = parts.first();
+            QString text = parts.mid(1).join(" ");
+            ui->messageTextEdit->append(playerName + ": " + text);
+        }
     }
     if(sequence.contains(overtimeGameMessage)) {
         ui->resultLabel->setText("Dogrywka");
+        ui->chatWidget->setVisible(true);
     }
 }
 
@@ -99,10 +129,10 @@ void AdminWindow::socketDisconnected()
 
 void AdminWindow::on_setTopicBtn_clicked()
 {
-    topic = ui->setTopicTextEdit->toPlainText();
-    QString command = "temat "+topic;
+    QString topicMessage = ui->setTopicTextEdit->toPlainText();
+    QString command = "temat "+topicMessage;
     socketManager->writeCommand(command);
-    ui->topicTextEdit->setText(topic);
+    ui->topicTextEdit->setText(topicMessage);
     ui->startTalkBtn->setEnabled(true);
     ui->resultLabel->setText("");
 }
@@ -123,9 +153,19 @@ void AdminWindow::on_stopTalkBtn_clicked()
 {
     QString command = "stop";
     socketManager->writeCommand(command);
-    topic = "";
-    ui->topicTextEdit->clear();
-    ui->startTalkBtn->setEnabled(false);
-    ui->setTopicBtn->setEnabled(true);
-    ui->stopTalkBtn->setEnabled(false);
+    ui->chatWidget->setVisible(false);
+    ui->messageTextEdit->clear();
 }
+
+void AdminWindow::on_sendMessageBtn_clicked()
+{
+    QString playerMessage = ui->sendMessageLineEdit->text().replace("\n", " ").trimmed();
+    QString command = "message "+playerMessage;
+    socketManager->writeCommand(command);
+
+    ui->messageTextEdit->setTextColor(Qt::blue);
+    ui->messageTextEdit->append("Ty: "+playerMessage+"\n");
+    ui->messageTextEdit->setTextColor(Qt::black);
+    ui->sendMessageLineEdit->clear();
+}
+

@@ -73,7 +73,7 @@
       <x>360</x>
       <y>10</y>
       <width>681</width>
-      <height>71</height>
+      <height>72</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="infoGroup" stretch="10,75,10,15">
@@ -148,7 +148,7 @@
      <rect>
       <x>10</x>
       <y>20</y>
-      <width>441</width>
+      <width>651</width>
       <height>72</height>
      </rect>
     </property>
@@ -208,6 +208,65 @@
    <property name="text">
     <string/>
    </property>
+  </widget>
+  <widget class="QWidget" name="chatWidget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>1360</x>
+     <y>100</y>
+     <width>241</width>
+     <height>701</height>
+    </rect>
+   </property>
+   <widget class="QTextEdit" name="messageTextEdit">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>70</y>
+      <width>211</width>
+      <height>411</height>
+     </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="sendMessageLineEdit">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>530</y>
+      <width>211</width>
+      <height>21</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="sendMessageBtn">
+    <property name="geometry">
+     <rect>
+      <x>50</x>
+      <y>600</y>
+      <width>141</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Wyślij wiadomość</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>30</y>
+      <width>141</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Czat do rozmowy</string>
+    </property>
+   </widget>
   </widget>
  </widget>
  <resources/>
