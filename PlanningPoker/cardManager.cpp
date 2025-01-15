@@ -76,6 +76,8 @@ void CardManager::removeCard(const QString& playerName)
 }
 
 void CardManager::showCard(const QString& playerName) {
+    std::vector<QString> cardPaintedSymbols = {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?", "☕"};
+
     if (!playerCards.contains(playerName)) {
         return;
     }
@@ -91,7 +93,7 @@ void CardManager::showCard(const QString& playerName) {
 
     QPainter painter(&newCard);
     painter.setFont(QFont("Arial", 32, QFont::Bold));
-    painter.drawText(newCard.rect(), Qt::AlignCenter, QString::number(cardNumber));
+    painter.drawText(newCard.rect(), Qt::AlignCenter, cardPaintedSymbols[cardNumber-1]);
     painter.end();
 
     cardLabel->setPixmap(newCard);
@@ -184,6 +186,7 @@ void CardManager::generateChooseCards(QWidget* parent) {
 
 
     std::vector<int> cardNumbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13};
+    std::vector<QString> cardPaintedSymbols = {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?", "☕"};
     int numCards = static_cast<int>(cardNumbers.size());
 
 
@@ -196,6 +199,7 @@ void CardManager::generateChooseCards(QWidget* parent) {
 
     for (int i = 0; i < numCards; ++i) {
         int cardNumber = cardNumbers[i];
+        QString cardPaintedSymbol = cardPaintedSymbols[i];
         int posX = startX + spacingX + i * (chooseCardHorizontalSize + spacingX);
         int posY = centerY;
 
@@ -209,7 +213,7 @@ void CardManager::generateChooseCards(QWidget* parent) {
 
         QPainter painter(&newCard);
         painter.setFont(QFont("Arial", 32, QFont::Bold));
-        painter.drawText(newCard.rect(), Qt::AlignCenter, QString::number(cardNumber));
+        painter.drawText(newCard.rect(), Qt::AlignCenter, cardPaintedSymbol);
         painter.end();
 
 

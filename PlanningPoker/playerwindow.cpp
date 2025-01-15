@@ -133,8 +133,9 @@ void PlayerWindow::responseReceived(const QString &message)
     }
     if(sequence.contains(wonGameMessage)) {
         int index = sequence.indexOf(wonGameMessage);
-        QString numberCard = sequence.mid(index + wonGameMessage.length()).trimmed();
-        ui->resultLabel->setText("Wygrana: "+numberCard);
+        int numberCard = sequence.mid(index + wonGameMessage.length()).trimmed().toInt();
+        std::vector<QString> cardPaintedSymbols = {"0", "1", "2", "3", "5", "8", "13", "21", "34", "55", "89", "?", "☕"};
+        ui->resultLabel->setText("Wygrana: "+cardPaintedSymbols[numberCard-1]);
         ui->topicTextEdit->clear();
         cardManager->toggleChooseCards(false);
     }
