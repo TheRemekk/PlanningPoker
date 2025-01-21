@@ -223,10 +223,11 @@ void handle_client_message(int client_socket, int epoll_fd) {
             }
 
             std::string result = "selected card";
-            for (const auto &[socket, player] : game.players) {
+            for (auto &[socket, player] : game.players) {
                 if (player.selected_card >= 1 && player.selected_card <= 13) {
                     result += " " + player.nick + " " + std::to_string(player.selected_card);
                 }
+		player.selected_card = -1;
             }
             broadcast_message(game, result + "\n", -1, true);
 

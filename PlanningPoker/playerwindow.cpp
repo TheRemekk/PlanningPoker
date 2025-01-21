@@ -154,6 +154,7 @@ void PlayerWindow::responseReceived(const QString &message)
     if(sequence.contains(overtimeGameMessage)) {
         ui->resultLabel->setText("Dogrywka");
         ui->chatWidget->setVisible(true);
+        cardManager->toggleChooseCards(true);
     }
 }
 
